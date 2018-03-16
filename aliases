@@ -1,0 +1,5 @@
+source environment
+
+alias wsk="wsk -i"
+alias gce_wsk="wsk --apihost $OW_GCE_APIHOST"
+alias aws_wsk="wsk --apihost $OW_AWS_APIHOST"

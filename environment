@@ -1,0 +1,7 @@
+OW_GCE_APIHOST=openwhisk-openwhisk.apps.summit-gce.sysdeseng.com
+OW_AWS_APIHOST=openwhisk-openwhisk.apps.summit-aws.sysdeseng.com
+
+S3_GCE_HOST=35.229.87.234:8080
+S3_GCE_AUTH=[AUTH TOKEN FOR S3_GCE_HOST]
+S3_AWS_HOST=54.210.65.134:8080
+S3_AWS_AUTH=[AUTH TOKEN FOR S3_AWS_HOST]
