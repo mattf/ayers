@@ -40,9 +40,6 @@ public class Action
       // Input: { "image": base64(img) } -- Image
       // Output: [ { "score": float, "voc": "[category]" }, ... ] -- Label[]
 
-      String modelEndpoint =
-         args.has("modelEndpoint") ? args.get("modelEndpoint").getAsString() : "http://localhost:8080/v2/yolo";
-
       Image image = new Image();
       if (args.has("imageFile")) {
          String filename = args.get("imageFile").getAsString();
@@ -60,7 +57,7 @@ public class Action
       }
 
       ResteasyClient client = new ResteasyClientBuilder().build();
-      Response response = client.target(modelEndpoint)
+      Response response = client.target(getModelEndpoint(args))
          .request()
          .accept(MediaType.APPLICATION_JSON_TYPE)
          .post(Entity.entity(image, MediaType.APPLICATION_JSON_TYPE));
@@ -72,5 +69,16 @@ public class Action
       }
 
       return args;
+   }
+
+
+   private static String getModelEndpoint(JsonObject args) {
+      String uri;
+      if (args.has("modelEndpoint")) {
+         uri = args.get("modelEndpoint").getAsString();
+      } else {
+         uri = "http://localhost:8080/v2/yolo";
+      }
+      return uri;
    }
 }
