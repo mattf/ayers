@@ -20,6 +20,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.client.Entity;
 
+import org.apache.commons.io.IOUtils;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -119,18 +121,8 @@ public class Action
       connection.setRequestProperty("X-Auth-Token", swiftObj.get("token").getAsString());
 
       LOGGER.info("S3 status code: " + connection.getResponseCode());
-      LOGGER.info("S3 content length: " + connection.getContentLength());
-      // XXX: will corrupt data for objects >2GB
-      int length = connection.getContentLength();
-      byte data[] = new byte[length];
-      InputStream in = connection.getInputStream();
-      int offset = 0;
-      int read = 0;
-      do {
-         read = in.read(data, offset, length - offset);
-         offset += read;
-      } while (read > 0);
 
-      return data;
+      // XXX: will corrupt data for objects >2GB
+      return IOUtils.toByteArray(connection);
    }
 }
