@@ -18,6 +18,7 @@ public class Main
          return;
       }
 
+      LOGGER.info("proceeding with args: " + args[0]);
       JsonObject jsonResult =
          new Action().main(new JsonParser().parse(args[0]).getAsJsonObject());
 
