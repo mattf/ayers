@@ -37,16 +37,22 @@ public class Action
       // Input: { "image": base64(img) } -- Image
       // Output: [ { "score": float, "voc": "[category]" }, ... ] -- Label[]
 
-      ResteasyClient client = new ResteasyClientBuilder().build();
-      Response response = client.target(getModelEndpoint(args))
-         .request()
-         .accept(MediaType.APPLICATION_JSON_TYPE)
-         .post(Entity.entity(getImage(args), MediaType.APPLICATION_JSON_TYPE));
-      int status = response.getStatus();
-      LOGGER.info("status: " + status);
-      Label[] labels = response.readEntity(Label[].class);
-      for (Label label : labels) {
-         LOGGER.info("identified: " + label.getVoc() + " - " + label.getScore());
+      try {
+         ResteasyClient client = new ResteasyClientBuilder().build();
+         Response response = client.target(getModelEndpoint(args))
+            .request()
+            .accept(MediaType.APPLICATION_JSON_TYPE)
+            .post(Entity.entity(getImage(args), MediaType.APPLICATION_JSON_TYPE));
+         int status = response.getStatus();
+         LOGGER.info("model status: " + status);
+         Label[] labels = response.readEntity(Label[].class);
+         for (Label label : labels) {
+            LOGGER.info("model identified: " + label.getVoc() + " - " + label.getScore());
+         }
+      } catch (FileNotFoundException e) {
+         e.printStackTrace();
+      } catch (IOException e) {
+         e.printStackTrace();
       }
 
       return args;
@@ -66,46 +72,43 @@ public class Action
    }
 
 
-   private static Image getImage(JsonObject args) {
-      Image image = new Image();
-      try {
-         byte[] data = new byte[0];
-         if (args.has("imageFile")) {
-            data = getImageFromFile(args.get("imageFile").getAsString());
-         } else if (args.has("swiftObj")) {
-            data = getImageFromS3(args.getAsJsonObject("swiftObj"));
-         } else {
-            LOGGER.fatal("unable to get image");
-         }
-
-         image.setImage(Base64.getEncoder().encodeToString(data));
-      } catch (FileNotFoundException e) {
-         e.printStackTrace();
-      } catch (IOException e) {
-         e.printStackTrace();
+   private static Image getImage(JsonObject args)
+      throws FileNotFoundException, IOException {
+      byte[] data = new byte[0];
+      if (args.has("imageFile")) {
+         data = getImageFromFile(args.get("imageFile").getAsString());
+      } else if (args.has("swiftObj")) {
+         data = getImageFromS3(args.getAsJsonObject("swiftObj"));
+      } else {
+         LOGGER.fatal("do not know where to find the image, need imageFile or swiftObj");
       }
 
-      return image;
+      return new Image(Base64.getEncoder().encodeToString(data));
    }
 
 
    private static byte[] getImageFromFile(String filename)
       throws FileNotFoundException, IOException {
+      LOGGER.info("filename: " + filename);
+
+      // XXX: will corrupt data for objects >2GB
       return IOUtils.toByteArray(new FileInputStream(filename));
    }
 
 
    private static byte[] getImageFromS3(JsonObject swiftObj)
       throws MalformedURLException, IOException {
-      // Example args["swiftObj"] -
+      // swiftObj -
       // {
-      //    "container": "ayers-images",
+      //    "container": "[S3 BUCKET]",
       //    "method": "PUT",
-      //    "object": "zero.jpg",
-      //    "token": "AUTH_xyz...",
-      //    "url": "http://host:port/v1/AUTH_gv0"
+      //    "object": "[TXN ID]",
+      //    "token": "[AUTH TOKEN]",
+      //    "url": "[S3 BASE URL]"
       // }
       LOGGER.info("swiftObj: " + swiftObj);
+
+      // TODO: validate swiftObj schema
 
       URL url = new URL(
          swiftObj.get("url").getAsString() + "/"
