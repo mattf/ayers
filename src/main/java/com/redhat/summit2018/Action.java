@@ -72,13 +72,10 @@ public class Action
 
       Image image = new Image();
       if (args.has("imageFile")) {
-         String filename = args.get("imageFile").getAsString();
-
-         File file = new File(filename);
-         try (FileInputStream in = new FileInputStream(file)) {
-            byte data[] = new byte[(int) file.length()];
-            in.read(data); // TODO: check result is -1
-            image.setImage(Base64.getEncoder().encodeToString(data));
+         try {
+            image.setImage(
+               Base64.getEncoder().encodeToString(
+                  getImageFromFile(args.get("imageFile").getAsString())));
          } catch (FileNotFoundException e) {
             e.printStackTrace();
          } catch (IOException e) {
@@ -87,5 +84,16 @@ public class Action
       }
 
       return image;
+   }
+
+
+   private static byte[] getImageFromFile(String filename)
+      throws FileNotFoundException, IOException {
+      File file = new File(filename);
+      FileInputStream in = new FileInputStream(file);
+      byte data[] = new byte[(int) file.length()];
+      in.read(data); // TODO: check result is -1
+
+      return data;
    }
 }
