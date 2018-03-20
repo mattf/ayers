@@ -91,12 +91,7 @@ public class Action
 
    private static byte[] getImageFromFile(String filename)
       throws FileNotFoundException, IOException {
-      File file = new File(filename);
-      FileInputStream in = new FileInputStream(file);
-      byte data[] = new byte[(int) file.length()];
-      in.read(data); // TODO: check result is -1
-
-      return data;
+      return IOUtils.toByteArray(new FileInputStream(filename));
    }
 
 
