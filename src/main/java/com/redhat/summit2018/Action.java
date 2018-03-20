@@ -1,6 +1,7 @@
 package com.redhat.summit2018;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -120,8 +121,15 @@ public class Action
       LOGGER.info("S3 status code: " + connection.getResponseCode());
       LOGGER.info("S3 content length: " + connection.getContentLength());
       // XXX: will corrupt data for objects >2GB
-      byte data[] = new byte[(int) connection.getContentLength()];
-      connection.getInputStream().read(data);
+      int length = connection.getContentLength();
+      byte data[] = new byte[length];
+      InputStream in = connection.getInputStream();
+      int offset = 0;
+      int read = 0;
+      do {
+         read = in.read(data, offset, length - offset);
+         offset += read;
+      } while (read > 0);
 
       return data;
    }
