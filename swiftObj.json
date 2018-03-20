@@ -1,0 +1,9 @@
+{
+    "swiftObj": {
+	"container": "ayers",
+	"method": "PUT",
+	"object": "img.jpg",
+	"token": "$S3_AWS_AUTH",
+	"url": "http://$S3_AWS_HOST/v1/AUTH_gv0"
+    }
+}
