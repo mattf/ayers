@@ -6,6 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.net.URL;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 
 import javax.ws.rs.core.MediaType;
 
@@ -61,26 +64,22 @@ public class Action
 
 
    private static Image getImage(JsonObject args) {
-      // Example args["swiftObj"] -
-      // "swiftObj": {
-      //    "container": "ayers-images",
-      //    "method": "PUT",
-      //    "object": "zero.jpg",
-      //    "token": "AUTH_xyz...",
-      //    "url": "http://host:port/v1/AUTH_gv0"
-      // }
-
       Image image = new Image();
-      if (args.has("imageFile")) {
-         try {
-            image.setImage(
-               Base64.getEncoder().encodeToString(
-                  getImageFromFile(args.get("imageFile").getAsString())));
-         } catch (FileNotFoundException e) {
-            e.printStackTrace();
-         } catch (IOException e) {
-            e.printStackTrace();
+      try {
+         byte[] data = new byte[0];
+         if (args.has("imageFile")) {
+            data = getImageFromFile(args.get("imageFile").getAsString());
+         } else if (args.has("swiftObj")) {
+            data = getImageFromS3(args.getAsJsonObject("swiftObj"));
+         } else {
+            LOGGER.fatal("unable to get image");
          }
+
+         image.setImage(Base64.getEncoder().encodeToString(data));
+      } catch (FileNotFoundException e) {
+         e.printStackTrace();
+      } catch (IOException e) {
+         e.printStackTrace();
       }
 
       return image;
@@ -93,6 +92,36 @@ public class Action
       FileInputStream in = new FileInputStream(file);
       byte data[] = new byte[(int) file.length()];
       in.read(data); // TODO: check result is -1
+
+      return data;
+   }
+
+
+   private static byte[] getImageFromS3(JsonObject swiftObj)
+      throws MalformedURLException, IOException {
+      // Example args["swiftObj"] -
+      // {
+      //    "container": "ayers-images",
+      //    "method": "PUT",
+      //    "object": "zero.jpg",
+      //    "token": "AUTH_xyz...",
+      //    "url": "http://host:port/v1/AUTH_gv0"
+      // }
+      LOGGER.info("swiftObj: " + swiftObj);
+
+      URL url = new URL(
+         swiftObj.get("url").getAsString() + "/"
+         + swiftObj.get("container").getAsString() + "/"
+         + swiftObj.get("object").getAsString());
+      LOGGER.info("S3 url: " + url);
+      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+      connection.setRequestProperty("X-Auth-Token", swiftObj.get("token").getAsString());
+
+      LOGGER.info("S3 status code: " + connection.getResponseCode());
+      LOGGER.info("S3 content length: " + connection.getContentLength());
+      // XXX: will corrupt data for objects >2GB
+      byte data[] = new byte[(int) connection.getContentLength()];
+      connection.getInputStream().read(data);
 
       return data;
    }
