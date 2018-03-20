@@ -51,8 +51,10 @@ public class Action
       String uri;
       if (args.has("modelEndpoint")) {
          uri = args.get("modelEndpoint").getAsString();
+         LOGGER.info("found modelEndpoint: " + uri);
       } else {
          uri = "http://localhost:8080/v2/yolo";
+         LOGGER.info("using default modelEndpoint: " + uri);
       }
       return uri;
    }
