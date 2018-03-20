@@ -1,6 +1,7 @@
 package com.redhat.summit2018;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,18 +13,13 @@ public class Main
 
    public static void main(String[] args)
    {
-      JsonObject jsonArgs = new JsonObject();
-      for (String arg : args) {
-         LOGGER.info("processing: " + arg);
-         String[] parts = arg.split("=");
-         if (parts.length == 2) {
-            LOGGER.info("found: " + parts[0] + " : " + parts[1]);
-            jsonArgs.addProperty(parts[0], parts[1]);
-         }
+      if (args.length < 1) {
+         LOGGER.warn("no arguments, exiting");
+         return;
       }
-      
-      Action action = new Action();
-      JsonObject jsonResult = action.main(jsonArgs);
+
+      JsonObject jsonResult =
+         new Action().main(new JsonParser().parse(args[0]).getAsJsonObject());
 
       LOGGER.info(jsonResult);
    }
