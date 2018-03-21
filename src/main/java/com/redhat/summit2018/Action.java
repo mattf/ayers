@@ -116,7 +116,12 @@ public class Action
          + swiftObj.get("object").getAsString());
       LOGGER.info("S3 url: " + url);
       HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-      connection.setRequestProperty("X-Auth-Token", swiftObj.get("token").getAsString());
+      // XXX: the token has two components separated by a ",", the X-Auth-Token is the second component
+      String token = swiftObj.get("token").getAsString();
+      String[] bits = token.split(",", 2);
+      token = bits[bits.length == 2 ? 1 : 0];
+      LOGGER.info("S3 auth token: " + token);
+      connection.setRequestProperty("X-Auth-Token", token);
 
       LOGGER.info("S3 status code: " + connection.getResponseCode());
 
