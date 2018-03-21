@@ -48,14 +48,14 @@ public class Action
          int status = response.getStatus();
          LOGGER.info("model status: " + status);
          Label[] labels = response.readEntity(Label[].class);
-         HashSet<String> objSet = new HashSet<String>();
+         JsonArray objects = new JsonArray();
+         HashSet<String> set = new HashSet<String>();
          for (Label label : labels) {
             LOGGER.info("model identified: " + label.getVoc() + " - " + label.getScore());
-            objSet.add(label.getVoc());
-         }
-         JsonArray objects = new JsonArray();
-         for (String obj : objSet) {
-            objects.add(obj);
+            if (!set.contains(label.getVoc())) {
+               objects.add(label.getVoc());
+               set.add(label.getVoc());
+            }
          }
          args.add("objects", objects);
       } catch (FileNotFoundException e) {
