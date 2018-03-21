@@ -10,12 +10,12 @@ aws_wsk() { wsk -i --apihost $OW_AWS_APIHOST $*; }
 S3_BUCKET=ayers-images
 ACTION_NAME=ayers
 
-mvn clean test package
+mvn clean test package -DskipTests
 
 # GCE
-gce_wsk action update $ACTION_NAME target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action --web=true
+gce_wsk action update $ACTION_NAME target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action --web=true -p modelEndpoint $MODEL_ENDPOINT
 curl -X PUT -H "X-Auth-Token: $S3_GCE_AUTH" -H "X-Webhook: $(gce_wsk action get $ACTION_NAME --url | tail -n1)" -H "X-Webhook-Auth: BOGUS:BOGUS" http://$S3_GCE_HOST/v1/AUTH_gv0/$S3_BUCKET
 
 # AWS
-aws_wsk action update $ACTION_NAME target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action --web=true
+aws_wsk action update $ACTION_NAME target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action --web=true -p modelEndpoint $MODEL_ENDPOINT
 curl -X PUT -H "X-Auth-Token: $S3_AWS_AUTH" -H "X-Webhook: $(aws_wsk action get $ACTION_NAME --url | tail -n1)" -H "X-Webhook-Auth: BOGUS:BOGUS" http://$S3_AWS_HOST/v1/AUTH_gv0/$S3_BUCKET
