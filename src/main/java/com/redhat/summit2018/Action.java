@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.HashSet;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -14,6 +15,7 @@ import java.net.MalformedURLException;
 import javax.ws.rs.core.MediaType;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonArray;
 
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
@@ -46,9 +48,16 @@ public class Action
          int status = response.getStatus();
          LOGGER.info("model status: " + status);
          Label[] labels = response.readEntity(Label[].class);
+         HashSet<String> objSet = new HashSet<String>();
          for (Label label : labels) {
             LOGGER.info("model identified: " + label.getVoc() + " - " + label.getScore());
+            objSet.add(label.getVoc());
          }
+         JsonArray objects = new JsonArray();
+         for (String obj : objSet) {
+            objects.add(obj);
+         }
+         args.add("objects", objects);
       } catch (FileNotFoundException e) {
          e.printStackTrace();
       } catch (IOException e) {
