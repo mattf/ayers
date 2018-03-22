@@ -6,6 +6,7 @@ source environment
 
 gce_wsk() { wsk -i --apihost $OW_GCE_APIHOST $*; }
 aws_wsk() { wsk -i --apihost $OW_AWS_APIHOST $*; }
+azr_wsk() { wsk -i --apihost $OW_AZR_APIHOST $*; }
 
 S3_BUCKET=ayers-images
 TRIGGER_NAME=ayersTrigger
@@ -37,3 +38,12 @@ aws_wsk trigger delete $TRIGGER_NAME && :
 aws_wsk trigger create $TRIGGER_NAME
 aws_wsk rule update $RULE_NAME $TRIGGER_NAME $ACTION_NAME
 curl -X PUT -H "X-Auth-Token: $S3_AWS_AUTH" -H "X-Webhook: $AWS_WEBHOOK" -H "X-Webhook-Auth: $AWS_AUTH" http://$S3_AWS_HOST/v1/AUTH_gv0/$S3_BUCKET
+
+# AZR
+azr_wsk action update $ACTION_NAME target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action -p modelEndpoint $MODEL_ENDPOINT
+# XXX: trigger update does not create a trigger, it is inconsistent w/ action update and rule update
+azr_wsk trigger delete $TRIGGER_NAME && :
+azr_wsk trigger create $TRIGGER_NAME
+azr_wsk rule update $RULE_NAME $TRIGGER_NAME $ACTION_NAME
+# TODO: S3 on Azure
+#curl -X PUT -H "X-Auth-Token: $S3_AZR_AUTH" -H "X-Webhook: $AZR_WEBHOOK" -H "X-Webhook-Auth: $AZR_AUTH" http://$S3_AZR_HOST/v1/AUTH_gv0/$S3_BUCKET
