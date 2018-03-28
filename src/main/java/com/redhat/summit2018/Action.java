@@ -131,6 +131,11 @@ public class Action
       LOGGER.info("swiftObj: " + swiftObj);
 
       // TODO: validate swiftObj schema
+      if (!(swiftObj.has("url") &&
+            swiftObj.has("container") &&
+            swiftObj.has("object"))) {
+         throw new IOException("url, container and object are required, given: " + swiftObj);
+      }
 
       URL url = new URL(
          swiftObj.get("url").getAsString() + "/"
