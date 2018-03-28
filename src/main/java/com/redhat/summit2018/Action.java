@@ -39,6 +39,11 @@ public class Action
       // Input: { "image": base64(img) } -- Image
       // Output: [ { "score": float, "voc": "[category]" }, ... ] -- Label[]
 
+      if (args.has("echoMode") &&
+          args.get("echoMode").getAsBoolean()) {
+         return args;
+      }
+
       try {
          ResteasyClient client = new ResteasyClientBuilder().build();
          Response response = client.target(getModelEndpoint(args))
