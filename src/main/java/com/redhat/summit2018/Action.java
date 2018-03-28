@@ -45,6 +45,8 @@ public class Action
       // Input: { "image": base64(img) } -- Image
       // Output: [ { "score": float, "voc": "[category]" }, ... ] -- Label[]
 
+      LOGGER.info("args:" + args);
+
       if (args.has("echoMode") &&
           args.get("echoMode").getAsBoolean()) {
          return args;
