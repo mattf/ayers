@@ -24,6 +24,7 @@ AWS_AUTH=$(aws_wsk property get --auth | head -n1 | awk '{print $3}')
 mvn clean test package -DskipTests
 
 # GCE
+# XXX: default memory of 256MB resulted in kubernetes level "OOMKilled" of function pod, reported via openwhisk as result.response.status="action developer error"
 gce_wsk action update $ACTION_NAME target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action -p modelEndpoint $MODEL_ENDPOINT --memory 512
 # XXX: trigger update does not create a trigger, it is inconsistent w/ action update and rule update
 gce_wsk trigger delete $TRIGGER_NAME && :
@@ -34,6 +35,7 @@ gce_wsk rule enable $RULE_NAME
 curl -X PUT -H "X-Webhook: $GCE_WEBHOOK" -H "X-Webhook-Auth: $GCE_AUTH" http://$S3_GCE_HOST/v1/AUTH_gv0/$S3_BUCKET
 
 ## AWS
+# XXX: default memory of 256MB resulted in kubernetes level "OOMKilled" of function pod, reported via openwhisk as result.response.status="action developer error"
 #aws_wsk action update $ACTION_NAME target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action -p modelEndpoint $MODEL_ENDPOINT --memory 512
 ## XXX: trigger update does not create a trigger, it is inconsistent w/ action update and rule update
 #aws_wsk trigger delete $TRIGGER_NAME && :
@@ -44,6 +46,7 @@ curl -X PUT -H "X-Webhook: $GCE_WEBHOOK" -H "X-Webhook-Auth: $GCE_AUTH" http://$
 #curl -X PUT -H "X-Webhook: $AWS_WEBHOOK" -H "X-Webhook-Auth: $AWS_AUTH" http://$S3_AWS_HOST/v1/AUTH_gv0/$S3_BUCKET
 
 ## AZR
+# XXX: default memory of 256MB resulted in kubernetes level "OOMKilled" of function pod, reported via openwhisk as result.response.status="action developer error"
 #azr_wsk action update $ACTION_NAME target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action -p modelEndpoint $MODEL_ENDPOINT --memory 512
 ## XXX: trigger update does not create a trigger, it is inconsistent w/ action update and rule update
 #azr_wsk trigger delete $TRIGGER_NAME && :
