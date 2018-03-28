@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 
 import javax.ws.rs.core.MediaType;
 
+import com.google.gson.JsonParser;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
 
@@ -21,6 +22,11 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.client.Entity;
+
+import org.infinispan.client.hotrod.RemoteCache;
+import org.infinispan.client.hotrod.RemoteCacheManager;
+import org.infinispan.client.hotrod.configuration.ConfigurationBuilder;
+import org.infinispan.client.hotrod.impl.ConfigurationProperties;
 
 import org.apache.commons.io.IOUtils;
 
@@ -63,6 +69,8 @@ public class Action
             }
          }
          args.add("objects", objects);
+
+         updateTransaction(args);
       } catch (FileNotFoundException e) {
          e.printStackTrace();
       } catch (IOException e) {
@@ -141,5 +149,34 @@ public class Action
 
       // XXX: will corrupt data for objects >2GB
       return IOUtils.toByteArray(connection);
+   }
+
+
+   private static void updateTransaction(JsonObject args) {
+      // txs cache schema -
+      // <String, String>, the key is the transaction id, the value is a JSON string
+      // The JSON contains 'playerId', 'taskId', metadata (JSON object).
+      // https://github.com/rhdemo/scavenger-hunt-microservice/blob/master/src/main/java/me/escoffier/keynote/MetadataRepository.java
+
+      if (args.has("swiftObj")) {
+         String transactionId = args.getAsJsonObject("swiftObj").get("object").getAsString();
+         LOGGER.info("transaction id: " + transactionId);
+
+         RemoteCacheManager manager =
+            new RemoteCacheManager(
+               new ConfigurationBuilder()
+               .addServer()
+               .host("jdg-app-hotrod.infinispan.svc")
+               .port(ConfigurationProperties.DEFAULT_HOTROD_PORT)
+               .build());
+         RemoteCache<String, String> cache = manager.getCache("txs");
+         JsonObject value =
+            new JsonParser()
+            .parse(cache.get(transactionId))
+            .getAsJsonObject();
+         LOGGER.info("value: " + value);
+         value.get("metadata").getAsJsonObject().add("objects", args.get("objects"));
+         cache.put(transactionId, value.toString());
+      }
    }
 }
