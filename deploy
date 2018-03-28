@@ -4,9 +4,9 @@ set -ex
 
 source environment
 
-gce_wsk() { wsk -i --apihost $OW_GCE_APIHOST $*; }
-aws_wsk() { wsk -i --apihost $OW_AWS_APIHOST $*; }
-azr_wsk() { wsk -i --apihost $OW_AZR_APIHOST $*; }
+gce_wsk() { wsk --apihost $OW_GCE_APIHOST $*; }
+aws_wsk() { wsk --apihost $OW_AWS_APIHOST $*; }
+azr_wsk() { wsk --apihost $OW_AZR_APIHOST $*; }
 
 S3_BUCKET=ayers-images
 TRIGGER_NAME=ayersTrigger
