@@ -159,6 +159,19 @@ public class Action
    }
 
 
+   private static String getInfinispanHost(JsonObject args) {
+      String host;
+      if (args.has("infinispanHost")) {
+         host = args.get("infinispanHost").getAsString();
+         LOGGER.info("found infinispanHost: " + host);
+      } else {
+         host = "jdg-app-hotrod.infinispan.svc";
+         LOGGER.info("using default infinispanHost: " + host);
+      }
+      return host;
+   }
+
+
    private static void updateTransaction(JsonObject args) {
       // txs cache schema -
       // <String, String>, the key is the transaction id, the value is a JSON string
@@ -173,7 +186,7 @@ public class Action
             new RemoteCacheManager(
                new ConfigurationBuilder()
                .addServer()
-               .host("jdg-app-hotrod.infinispan.svc")
+               .host(getInfinispanHost(args))
                .port(ConfigurationProperties.DEFAULT_HOTROD_PORT)
                .build());
          RemoteCache<String, String> cache = manager.getCache("txs");
