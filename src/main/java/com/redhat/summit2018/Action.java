@@ -195,7 +195,14 @@ public class Action
             .parse(cache.get(transactionId))
             .getAsJsonObject();
          LOGGER.info("value: " + value);
-         value.get("metadata").getAsJsonObject().add("objects", args.get("objects"));
+         JsonObject metadata;
+         if (value.has("metadata")) {
+            metadata = value.getAsJsonObject("metadata");
+         } else {
+            metadata = new JsonObject();
+            value.add("metadata", metadata);
+         }
+         metadata.add("objects", args.get("objects"));
          cache.put(transactionId, value.toString());
       }
    }
