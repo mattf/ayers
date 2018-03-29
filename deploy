@@ -7,22 +7,24 @@ const request = require('request')
 const openwhisk = require('openwhisk')
 
 function createBuckets(cloud) {
-    request({
-	uri: config.s3Uri + cloud.bucket,
-	method: "PUT",
-	headers: {
-	    // XXX: why is X-Auth needed?
-	    "X-Auth": "BOGUS",
-	    "X-Webhook": cloud.triggerUri,
-	    "X-Webhook-Auth": process.env.__OW_API_KEY
-	}
-    }, (error, response, body) => {
-	if (response.statusCode >= 200 &&
-	    response.statusCode < 300) {
-	    console.log(cloud.name, "created bucket", cloud.bucket)
-	} else {
-	    console.log(cloud.name, "bucket creation failed", body)
-	}
+    cloud.buckets.forEach(function(bucket) {
+	request({
+	    uri: bucket,
+	    method: "PUT",
+	    headers: {
+		// XXX: why is X-Auth needed?
+		"X-Auth": "BOGUS",
+		"X-Webhook": cloud.triggerUri,
+		"X-Webhook-Auth": process.env.__OW_API_KEY
+	    }
+	}, (error, response, body) => {
+	    if (response.statusCode >= 200 &&
+		response.statusCode < 300) {
+		console.log(cloud.name, "created bucket", bucket)
+	    } else {
+		console.log(cloud.name, "bucket creation failed", body)
+	    }
+	})
     })
 }
 

@@ -4,27 +4,35 @@
     "actionJarMain": "com.redhat.summit2018.Action",
     "trigger": "functionBTrigger",
     "rule": "functionBRule",
-    "s3Uri": "http://storage-aws1.sysdeseng.com:8080/v1/AUTH_gv0/",
     "clouds": [
 	{"name": "aws",
 	 "openwhiskApihost": "openwhisk-openwhisk.apps.summit-aws.sysdeseng.com",
 	 "triggerUri": "https://openwhisk-openwhisk.apps.summit-aws.sysdeseng.com/api/v1/namespaces/_/triggers/functionBTrigger",
 	 "modelUri": "http://yolo.imagescorer.svc:8080/v2/yolo",
-	 "bucket": "images-aws",
-	 "s3Uris": [
-	     "http://storage-aws1.sysdeseng.com:8080/v1/AUTH_gv0/",
-	     "http://storage-aws2.sysdeseng.com:8080/v1/AUTH_gv0/",
-	     "http://storage-aws3.sysdeseng.com:8080/v1/AUTH_gv0/"
+	 "buckets": [
+	     "http://storage-aws1.sysdeseng.com:8080/v1/AUTH_gv0/images-aws1/",
+	     "http://storage-aws2.sysdeseng.com:8080/v1/AUTH_gv0/images-aws2/",
+	     "http://storage-aws3.sysdeseng.com:8080/v1/AUTH_gv0/images-aws3/"
 	 ]
 	},
 	{"name": "gce",
 	 "openwhiskApihost": "openwhisk-openwhisk.apps.summit-gce.sysdeseng.com",
 	 "triggerUri": "https://openwhisk-openwhisk.apps.summit-gce.sysdeseng.com/api/v1/namespaces/_/triggers/functionBTrigger",
 	 "modelUri": "http://yolo.imagescorer.svc:8080/v2/yolo",
-	 "bucket": "images-gce",
-	 "s3Uris" : [
-	     "http://storage-gce2.summit-gce.sysdeseng.com:8080/v1/AUTH_gv0/",
-	     "http://storage-gce3.summit-gce.sysdeseng.com:8080/v1/AUTH_gv0/"
+	 "buckets" : [
+	     "http://storage-gce1.summit-gce.sysdeseng.com:8080/v1/AUTH_gv0/images-gce1/",
+	     "http://storage-gce2.summit-gce.sysdeseng.com:8080/v1/AUTH_gv0/images-gce2/",
+	     "http://storage-gce3.summit-gce.sysdeseng.com:8080/v1/AUTH_gv0/images-gce3/"
+	 ]
+	},
+	{"name": "azr",
+	 "openwhiskApihost": "openwhisk-openwhisk.apps.summit-azr.sysdeseng.com",
+	 "triggerUri": "https://openwhisk-openwhisk.apps.summit-azr.sysdeseng.com/api/v1/namespaces/_/triggers/functionBTrigger",
+	 "modelUri": "http://yolo.imagescorer.svc:8080/v2/yolo",
+	 "buckets" : [
+	     "http://storage-aze1.westeurope.cloudapp.azure.com:8080/v1/AUTH_gv0/images-azr1/",
+	     "http://storage-aze2.westeurope.cloudapp.azure.com:8080/v1/AUTH_gv0/images-azr2/",
+	     "http://storage-aze3.westeurope.cloudapp.azure.com:8080/v1/AUTH_gv0/images-azr3/"
 	 ]
 	}
     ]
