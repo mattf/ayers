@@ -1,6 +1,6 @@
 # Build Ayers
 
-```mvn package -DskipTests```
+```mvn package```
 
 
 # Download an image call it img.jpg
@@ -34,7 +34,7 @@ from it.
 
 ```
 source environment
-mvn clean test package -DskipTests
+mvn clean test package
 wsk -i action update ayers target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action --web=true -p modelEndpoint $MODEL_ENDPOINT
 ```
 

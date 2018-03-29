@@ -21,7 +21,7 @@ GCE_AUTH=$(gce_wsk property get --auth | head -n1 | awk '{print $3}')
 AWS_WEBHOOK=https://openwhisk-openwhisk.apps.summit-aws.sysdeseng.com/api/v1/namespaces/_/triggers/$TRIGGER_NAME
 AWS_AUTH=$(aws_wsk property get --auth | head -n1 | awk '{print $3}')
 
-mvn clean test package -DskipTests
+mvn clean test package
 
 # GCE
 # XXX: default memory of 256MB resulted in kubernetes level "OOMKilled" of function pod, reported via openwhisk as result.response.status="action developer error"

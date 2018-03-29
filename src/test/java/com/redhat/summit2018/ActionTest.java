@@ -36,6 +36,7 @@ public class ActionTest
    public void testAction()
    {
       JsonObject input = new JsonObject();
+      input.addProperty("echoMode", "true");
       input.addProperty("param", "value");
       Action action = new Action();
       JsonObject output = action.main(input);
