@@ -18,11 +18,12 @@ function createBuckets(cloud) {
 		"X-Webhook-Auth": process.env.__OW_API_KEY
 	    }
 	}, (error, response, body) => {
-	    if (response.statusCode >= 200 &&
+	    if (response &&
+		response.statusCode >= 200 &&
 		response.statusCode < 300) {
 		console.log(cloud.name, "created bucket", bucket)
 	    } else {
-		console.log(cloud.name, "bucket creation failed", body)
+		console.log(cloud.name, bucket, "creation failed", error)
 	    }
 	})
     })
