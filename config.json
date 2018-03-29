@@ -1,0 +1,31 @@
+{
+    "action": "functionBAction",
+    "actionJar": "target/ayers-1.0-SNAPSHOT.jar",
+    "actionJarMain": "com.redhat.summit2018.Action",
+    "trigger": "functionBTrigger",
+    "rule": "functionBRule",
+    "s3Uri": "http://storage-aws1.sysdeseng.com:8080/v1/AUTH_gv0/",
+    "clouds": [
+	{"name": "aws",
+	 "openwhiskApihost": "openwhisk-openwhisk.apps.summit-aws.sysdeseng.com",
+	 "triggerUri": "https://openwhisk-openwhisk.apps.summit-aws.sysdeseng.com/api/v1/namespaces/_/triggers/functionBTrigger",
+	 "modelUri": "http://yolo.imagescorer.svc:8080/v2/yolo",
+	 "bucket": "images-aws",
+	 "s3Uris": [
+	     "http://storage-aws1.sysdeseng.com:8080/v1/AUTH_gv0/",
+	     "http://storage-aws2.sysdeseng.com:8080/v1/AUTH_gv0/",
+	     "http://storage-aws3.sysdeseng.com:8080/v1/AUTH_gv0/"
+	 ]
+	},
+	{"name": "gce",
+	 "openwhiskApihost": "openwhisk-openwhisk.apps.summit-gce.sysdeseng.com",
+	 "triggerUri": "https://openwhisk-openwhisk.apps.summit-gce.sysdeseng.com/api/v1/namespaces/_/triggers/functionBTrigger",
+	 "modelUri": "http://yolo.imagescorer.svc:8080/v2/yolo",
+	 "bucket": "images-gce",
+	 "s3Uris" : [
+	     "http://storage-gce2.summit-gce.sysdeseng.com:8080/v1/AUTH_gv0/",
+	     "http://storage-gce3.summit-gce.sysdeseng.com:8080/v1/AUTH_gv0/"
+	 ]
+	}
+    ]
+}

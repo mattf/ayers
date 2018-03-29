@@ -1,58 +1,89 @@
-#!/bin/bash
+#!/bin/node
 
-set -ex
+const config = require('./config.json')
 
-source environment
+const fs = require('fs')
+const request = require('request')
+const openwhisk = require('openwhisk')
 
-gce_wsk() { wsk --apihost $OW_GCE_APIHOST $*; }
-aws_wsk() { wsk --apihost $OW_AWS_APIHOST $*; }
-azr_wsk() { wsk --apihost $OW_AZR_APIHOST $*; }
+function createBuckets(cloud) {
+    request({
+	uri: config.s3Uri + cloud.bucket,
+	method: "PUT",
+	headers: {
+	    // XXX: why is X-Auth needed?
+	    "X-Auth": "BOGUS",
+	    "X-Webhook": cloud.triggerUri,
+	    "X-Webhook-Auth": process.env.__OW_API_KEY
+	}
+    }, (error, response, body) => {
+	if (response.statusCode >= 200 &&
+	    response.statusCode < 300) {
+	    console.log(cloud.name, "created bucket", cloud.bucket)
+	} else {
+	    console.log(cloud.name, "bucket creation failed", body)
+	}
+    })
+}
 
-S3_BUCKET=ayers-images
-TRIGGER_NAME=ayersTrigger
-RULE_NAME=ayersRule
-ACTION_NAME=ayers
 
-# XXX: there's no 'trigger get --url' similar to 'action get --url'
-GCE_WEBHOOK=https://openwhisk-openwhisk.apps.summit-gce.sysdeseng.com/api/v1/namespaces/_/triggers/$TRIGGER_NAME
-GCE_AUTH=$(gce_wsk property get --auth | head -n1 | awk '{print $3}')
+if (!process.env.__OW_API_KEY) {
+    console.log("please run...")
+    console.log("export __OW_API_KEY=$(wsk property get --auth | head -n1 | awk '{print $3}')")
+    process.exit(1)
+}
 
-# XXX: there's no 'trigger get --url' similar to 'action get --url'
-AWS_WEBHOOK=https://openwhisk-openwhisk.apps.summit-aws.sysdeseng.com/api/v1/namespaces/_/triggers/$TRIGGER_NAME
-AWS_AUTH=$(aws_wsk property get --auth | head -n1 | awk '{print $3}')
+console.log(config)
 
-mvn clean test package
-
-# GCE
-# XXX: default memory of 256MB resulted in kubernetes level "OOMKilled" of function pod, reported via openwhisk as result.response.status="action developer error"
-gce_wsk action update $ACTION_NAME target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action -p modelEndpoint $MODEL_ENDPOINT --memory 512
-# XXX: trigger update does not create a trigger, it is inconsistent w/ action update and rule update
-gce_wsk trigger delete $TRIGGER_NAME && :
-gce_wsk trigger create $TRIGGER_NAME
-gce_wsk rule update $RULE_NAME $TRIGGER_NAME $ACTION_NAME
-# XXX: https://github.com/apache/incubator-openwhisk/pull/3254
-gce_wsk rule enable $RULE_NAME
-curl -X PUT -H "X-Webhook: $GCE_WEBHOOK" -H "X-Webhook-Auth: $GCE_AUTH" http://$S3_GCE_HOST/v1/AUTH_gv0/$S3_BUCKET
-
-## AWS
-# XXX: default memory of 256MB resulted in kubernetes level "OOMKilled" of function pod, reported via openwhisk as result.response.status="action developer error"
-#aws_wsk action update $ACTION_NAME target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action -p modelEndpoint $MODEL_ENDPOINT --memory 512
-## XXX: trigger update does not create a trigger, it is inconsistent w/ action update and rule update
-#aws_wsk trigger delete $TRIGGER_NAME && :
-#aws_wsk trigger create $TRIGGER_NAME
-#aws_wsk rule update $RULE_NAME $TRIGGER_NAME $ACTION_NAME
-## XXX: https://github.com/apache/incubator-openwhisk/pull/3254
-#aws_wsk rule enable $RULE_NAME
-#curl -X PUT -H "X-Webhook: $AWS_WEBHOOK" -H "X-Webhook-Auth: $AWS_AUTH" http://$S3_AWS_HOST/v1/AUTH_gv0/$S3_BUCKET
-
-## AZR
-# XXX: default memory of 256MB resulted in kubernetes level "OOMKilled" of function pod, reported via openwhisk as result.response.status="action developer error"
-#azr_wsk action update $ACTION_NAME target/ayers-1.0-SNAPSHOT.jar --main com.redhat.summit2018.Action -p modelEndpoint $MODEL_ENDPOINT --memory 512
-## XXX: trigger update does not create a trigger, it is inconsistent w/ action update and rule update
-#azr_wsk trigger delete $TRIGGER_NAME && :
-#azr_wsk trigger create $TRIGGER_NAME
-#azr_wsk rule update $RULE_NAME $TRIGGER_NAME $ACTION_NAME
-## XXX: https://github.com/apache/incubator-openwhisk/pull/3254
-#azr_wsk rule enable $RULE_NAME
-## TODO: S3 on Azure
-##curl -X PUT -H "X-Webhook: $AZR_WEBHOOK" -H "X-Webhook-Auth: $AZR_AUTH" http://$S3_AZR_HOST/v1/AUTH_gv0/$S3_BUCKET
+const actionJar = fs.readFileSync(config.actionJar)
+config.clouds.forEach(function(cloud) {
+    // make sure __OW_API_KEY is set in environment, e.g. export __OW_API_KEY=$(wsk property get --auth | head -n1 | awk '{print $3}')
+    var ow = openwhisk({apihost: cloud.openwhiskApihost})
+    console.log(cloud.name, "creating action", config.action)
+    ow.actions.update({
+	name: config.action,
+	action: {
+	    exec: {
+		kind: 'java',
+		main: config.actionJarMain,
+		code: fs.readFileSync(config.actionJar).toString('base64')
+	    },
+	    parameters: [
+		{
+		    key: 'modelEndpoint',
+		    value: cloud.modelUri
+		}
+	    ],
+	    limits: {
+		memory: 512
+	    }
+	}
+    }).then(result => {
+	console.log(cloud.name, "created action", config.action)
+	ow.triggers.delete({name: config.trigger}).catch(err => {
+	    // XXX: trigger update does not create a trigger, it is inconsistent w/ action update and rule update
+	}).then(result => {
+	    ow.triggers.create({name: config.trigger}).then(result => {
+		console.log(cloud.name, "created trigger", config.trigger)
+		ow.rules.update({name: config.rule,
+				 trigger: config.trigger,
+				 action: config.action}).then(result => {
+			console.log(cloud.name, "created rule", config.rule)
+		    }).catch(err => {
+			console.error(cloud.name, "rule creation failed", err)
+		    }).then(result => {
+			ow.rules.enable({name: config.rule}).catch(err => {
+			    console.error(cloud.name, "rule enabling failed", err)
+			}).then(result => {
+			    // XXX: existing rules on disabled on UPDATE, must re-enable - https://github.com/apache/incubator-openwhisk/pull/3254
+			})
+		    })
+	    }).catch(err => {
+		console.error(cloud.name, "trigger creation failed", err)
+	    })
+	})
+    }).catch(err => {
+	console.error(cloud.name, "action creation failed", err)
+    })
+    createBuckets(cloud)
+})
