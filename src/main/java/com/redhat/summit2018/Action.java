@@ -7,16 +7,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.HashSet;
 
-import javax.ws.rs.core.MediaType;
-
 import com.google.gson.JsonParser;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
-
-import org.jboss.resteasy.client.jaxrs.ResteasyClient;
-import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.client.Entity;
 
 import org.infinispan.client.hotrod.RemoteCache;
 import org.infinispan.client.hotrod.RemoteCacheManager;
@@ -34,10 +27,6 @@ public class Action
    private static final Logger LOGGER = LogManager.getLogger(Action.class);
 
    public static JsonObject main(JsonObject args) {
-      // YOLOv2 service
-      // Input: { "image": base64(img) } -- Image
-      // Output: [ { "score": float, "voc": "[category]" }, ... ] -- Label[]
-
       LOGGER.info("args:" + args);
 
       if (args.has("echoMode") &&
@@ -46,14 +35,9 @@ public class Action
       }
 
       try {
-         ResteasyClient client = new ResteasyClientBuilder().build();
-         Response response = client.target(getModelEndpoint(args))
-            .request()
-            .accept(MediaType.APPLICATION_JSON_TYPE)
-            .post(Entity.entity(new Image(args), MediaType.APPLICATION_JSON_TYPE));
-         int status = response.getStatus();
-         LOGGER.info("model status: " + status);
-         Label[] labels = response.readEntity(Label[].class);
+         ModelService service = new ModelService(args);
+         Label[] labels = service.score(new Image(args));
+
          JsonArray objects = new JsonArray();
          HashSet<String> set = new HashSet<String>();
          for (Label label : labels) {
@@ -73,19 +57,6 @@ public class Action
       }
 
       return args;
-   }
-
-
-   private static String getModelEndpoint(JsonObject args) {
-      String uri;
-      if (args.has("modelEndpoint")) {
-         uri = args.get("modelEndpoint").getAsString();
-         LOGGER.info("found modelEndpoint: " + uri);
-      } else {
-         uri = "http://localhost:8080/v2/yolo";
-         LOGGER.info("using default modelEndpoint: " + uri);
-      }
-      return uri;
    }
 
 
