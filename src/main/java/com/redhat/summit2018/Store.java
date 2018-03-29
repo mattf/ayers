@@ -42,7 +42,8 @@ public class Store
       // https://github.com/rhdemo/scavenger-hunt-microservice/blob/master/src/main/java/me/escoffier/keynote/MetadataRepository.java
 
       if (args.has("swiftObj")) {
-         String transactionId = args.getAsJsonObject("swiftObj").get("object").getAsString();
+         String transactionId =
+            args.getAsJsonObject("swiftObj").get("object").getAsString().split("\\.", 2)[0];
          LOGGER.info("transaction id: " + transactionId);
 
          RemoteCacheManager manager =
