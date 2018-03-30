@@ -53,21 +53,12 @@ public class Store
                .host(infinispanHost)
                .port(ConfigurationProperties.DEFAULT_HOTROD_PORT)
                .build());
-         RemoteCache<String, String> cache = manager.getCache("txs");
+         RemoteCache<String, String> cache = manager.getCache();
+         LOGGER.info("cache:", cache);
 
-         JsonObject value =
-            new JsonParser()
-            .parse(cache.get(transactionId))
-            .getAsJsonObject();
+         JsonObject value = new JsonObject();
+         value.add("objects", args.get("objects"));
          LOGGER.info("value: " + value);
-         JsonObject metadata;
-         if (value.has("metadata")) {
-            metadata = value.getAsJsonObject("metadata");
-         } else {
-            metadata = new JsonObject();
-            value.add("metadata", metadata);
-         }
-         metadata.add("objects", args.get("objects"));
          cache.put(transactionId, value.toString());
       }
    }
