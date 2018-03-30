@@ -35,31 +35,17 @@ public class Store
       return host;
    }
 
-   public void updateTransaction(JsonObject args) {
-      // txs cache schema -
-      // <String, String>, the key is the transaction id, the value is a JSON string
-      // The JSON contains 'playerId', 'taskId', metadata (JSON object).
-      // https://github.com/rhdemo/scavenger-hunt-microservice/blob/master/src/main/java/me/escoffier/keynote/MetadataRepository.java
+   public void store(String key, String value) {
+      LOGGER.info(key + " = " + value);
+      RemoteCacheManager manager =
+         new RemoteCacheManager(
+            new ConfigurationBuilder()
+            .addServer()
+            .host(infinispanHost)
+            .port(ConfigurationProperties.DEFAULT_HOTROD_PORT)
+            .build());
+      RemoteCache<String, String> cache = manager.getCache();
 
-      if (args.has("swiftObj")) {
-         String transactionId =
-            args.getAsJsonObject("swiftObj").get("object").getAsString().split("\\.", 2)[0];
-         LOGGER.info("transaction id: " + transactionId);
-
-         RemoteCacheManager manager =
-            new RemoteCacheManager(
-               new ConfigurationBuilder()
-               .addServer()
-               .host(infinispanHost)
-               .port(ConfigurationProperties.DEFAULT_HOTROD_PORT)
-               .build());
-         RemoteCache<String, String> cache = manager.getCache();
-         LOGGER.info("cache:", cache);
-
-         JsonObject value = new JsonObject();
-         value.add("objects", args.get("objects"));
-         LOGGER.info("value: " + value);
-         cache.put(transactionId, value.toString());
-      }
+      cache.put(key, value);
    }
 }

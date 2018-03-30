@@ -48,7 +48,11 @@ public class Action
          }
          args.add("objects", objects);
 
-         new Store(args).updateTransaction(args);
+         String transactionId =
+            args.getAsJsonObject("swiftObj").get("object").getAsString().split("\\.", 2)[0];
+         LOGGER.info("transaction id: " + transactionId);
+
+         new Store(args).store(transactionId, args.toString());
       } catch (FileNotFoundException e) {
          e.printStackTrace();
       } catch (IOException e) {
