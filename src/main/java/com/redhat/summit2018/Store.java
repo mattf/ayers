@@ -17,10 +17,15 @@ public class Store
 {
    private static final Logger LOGGER = LogManager.getLogger(Store.class);
 
-   private String infinispanHost;
+   private RemoteCacheManager manager;
 
    public Store(JsonObject args) {
-      infinispanHost = findInfinispanHost(args);
+      manager = new RemoteCacheManager(
+         new ConfigurationBuilder()
+         .addServer()
+         .host(findInfinispanHost(args))
+         .port(ConfigurationProperties.DEFAULT_HOTROD_PORT)
+         .build());
    }
 
    private static String findInfinispanHost(JsonObject args) {
@@ -35,17 +40,24 @@ public class Store
       return host;
    }
 
-   public void store(String key, String value) {
-      LOGGER.info(key + " = " + value);
-      RemoteCacheManager manager =
-         new RemoteCacheManager(
-            new ConfigurationBuilder()
-            .addServer()
-            .host(infinispanHost)
-            .port(ConfigurationProperties.DEFAULT_HOTROD_PORT)
-            .build());
-      RemoteCache<String, String> cache = manager.getCache();
+   public JsonObject getTransaction(String transactionId) {
+      RemoteCache<String,String> cache = manager.getCache("txs");
+      return new JsonParser()
+         .parse(cache.get(transactionId))
+         .getAsJsonObject();
+   }
 
-      cache.put(key, value);
+   public JsonObject getTask(String taskId) {
+      RemoteCache<String,String> cache = manager.getCache("tasks");
+      return new JsonParser()
+         .parse(cache.get(taskId))
+         .getAsJsonObject();
+   }
+
+   public void putScore(String transactionId, int score) {
+      RemoteCache<String, String> cache = manager.getCache("objects");
+      JsonObject value = new JsonObject();
+      value.addProperty("score", score);
+      cache.put(transactionId, value.toString());
    }
 }
