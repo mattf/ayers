@@ -71,12 +71,16 @@ public class Action
          int score = 0;
          LOGGER.info("looking for: " + targetStr);
          JsonArray objects = new JsonArray();
+         HashSet<String> set = new HashSet<String>();
          for (Label label : labels) {
             LOGGER.info("model identified: " + label.getVoc() + " - " + label.getScore());
-            objects.add(label.getVoc());
-            if (targetStr.equalsIgnoreCase(label.getVoc())) {
-               LOGGER.info("found one");
-               score = task.get("point").getAsInt();
+            if (!set.contains(label.getVoc())) {
+               set.add(label.getVoc());
+               objects.add(label.getVoc());
+               if (targetStr.equalsIgnoreCase(label.getVoc())) {
+                  LOGGER.info("found one");
+                  score = task.get("point").getAsInt();
+               }
             }
          }
          LOGGER.info("awarding points: " + score);
