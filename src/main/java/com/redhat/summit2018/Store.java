@@ -74,6 +74,7 @@ public class Store
          LOGGER.fatal("failed to get cache: objects");
       } else {
          cache.put(transactionId, result.toString());
+         LOGGER.info("put: " + result);
       }
    }
 }
