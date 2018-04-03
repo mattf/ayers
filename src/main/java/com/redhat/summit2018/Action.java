@@ -86,10 +86,11 @@ public class Action
          // XXX: duplicated from transaction
          result.add("playerId", transaction.get("playerId"));
          result.addProperty("transactionId", transactionId);
+         result.add("data-center", transaction.get("data-center"));
          result.add("taskId", taskId);
          result.addProperty("url", image.getUrl().toString());
          result.add("objects", objects);
-         result.add("taskName", task.get("name"));
+         result.add("taskName", task.get("description"));
          result.add("taskObject", target);
 
          store.putResult(transactionId, result);
