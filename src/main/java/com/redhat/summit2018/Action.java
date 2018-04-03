@@ -74,7 +74,8 @@ public class Action
          for (Label label : labels) {
             LOGGER.info("model identified: " + label.getVoc() + " - " + label.getScore());
             objects.add(label.getVoc());
-            if (label.getVoc() == targetStr) {
+            if (targetStr.equalsIgnoreCase(label.getVoc())) {
+               LOGGER.info("found one");
                score = task.get("point").getAsInt();
             }
          }
