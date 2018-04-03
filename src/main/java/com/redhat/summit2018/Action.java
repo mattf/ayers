@@ -27,6 +27,10 @@ public class Action
    private static final Logger LOGGER = LogManager.getLogger(Action.class);
 
    public static JsonObject main(JsonObject args) {
+      long enter, exit;
+
+      enter = System.currentTimeMillis();
+
       LOGGER.info("args:" + args);
 
       if (args.has("echoMode") &&
@@ -97,6 +101,12 @@ public class Action
          result.add("objects", objects);
          result.add("taskName", task.get("description"));
          result.add("taskObject", target);
+
+         exit = System.currentTimeMillis();
+
+         result.addProperty("function-b-enter-time-ms", enter);
+         result.addProperty("function-b-exit-time-ms", exit);
+         result.addProperty("function-b-duration-time-ms", exit - enter);
 
          store.putResult(transactionId, result);
       } catch (FileNotFoundException e) {
