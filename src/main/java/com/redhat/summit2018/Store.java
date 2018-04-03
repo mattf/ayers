@@ -2,6 +2,8 @@ package com.redhat.summit2018;
 
 import java.lang.RuntimeException;
 
+import java.util.Optional;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -40,24 +42,38 @@ public class Store
       return host;
    }
 
-   public JsonObject getTransaction(String transactionId) {
-      RemoteCache<String,String> cache = manager.getCache("txs");
-      return new JsonParser()
-         .parse(cache.get(transactionId))
-         .getAsJsonObject();
+   private Optional<JsonObject> get(String name, String id) {
+      Optional<JsonObject> result = Optional.empty();
+      RemoteCache<String,String> cache = manager.getCache(name);
+      if (cache == null) {
+         LOGGER.fatal("failed to get cache: " + name);
+      } else {
+         LOGGER.info("got cache: " + name);
+         String object = cache.get(id);
+         if (object == null) {
+            LOGGER.fatal("failed to get: " + id);
+         } else {
+            LOGGER.info("got: " + object);
+            result = Optional.of(new JsonParser().parse(object).getAsJsonObject());
+         }
+      }
+      return result;
    }
 
-   public JsonObject getTask(String taskId) {
-      RemoteCache<String,String> cache = manager.getCache("tasks");
-      return new JsonParser()
-         .parse(cache.get(taskId))
-         .getAsJsonObject();
+   public Optional<JsonObject> getTransaction(String transactionId) {
+      return get("txs", transactionId);
    }
 
-   public void putScore(String transactionId, int score) {
+   public Optional<JsonObject> getTask(String taskId) {
+      return get("tasks", taskId);
+   }
+
+   public void putResult(String transactionId, JsonObject result) {
       RemoteCache<String, String> cache = manager.getCache("objects");
-      JsonObject value = new JsonObject();
-      value.addProperty("score", score);
-      cache.put(transactionId, value.toString());
+      if (cache == null) {
+         LOGGER.fatal("failed to get cache: objects");
+      } else {
+         cache.put(transactionId, result.toString());
+      }
    }
 }

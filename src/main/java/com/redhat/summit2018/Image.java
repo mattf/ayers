@@ -20,6 +20,7 @@ public class Image
    private static final Logger LOGGER = LogManager.getLogger(Image.class);
 
    private String image;
+   private URL url;
 
    public Image(JsonObject args)
       throws FileNotFoundException, IOException {
@@ -50,7 +51,7 @@ public class Image
          throw new IOException("url, container and object are required, given: " + swiftObj);
       }
 
-      URL url = new URL(
+      url = new URL(
          swiftObj.get("url").getAsString() + "/"
          + swiftObj.get("container").getAsString() + "/"
          + swiftObj.get("object").getAsString());
@@ -83,5 +84,9 @@ public class Image
 
    public String getImage() {
       return image;
+   }
+
+   public URL getUrl() {
+      return url;
    }
 }
