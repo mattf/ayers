@@ -86,18 +86,13 @@ public class Action
          JsonArray objects = new JsonArray();
          HashSet<String> set = new HashSet<String>();
          for (Label label : labels) {
-            LOGGER.info("model identified: " +
-                        label.getVoc() + " - " +
-                        label.getScore() + " - " +
-                        label.getArea());
+            LOGGER.info("model identified: {} - {} - {}", label.getVoc(), label.getScore(), label.getArea());
             if (!set.contains(label.getVoc())) {
                set.add(label.getVoc());
                objects.add(label.getVoc());
             }
             if (targetStr.equalsIgnoreCase(label.getVoc())) {
-               LOGGER.info("found one; " +
-                           "certainty: " + label.getScore() +
-                           "area: " + label.getArea());
+               LOGGER.info("found one; certainty: {}, area: {}", label.getScore(), label.getArea());
                score = task.get("point").getAsInt();
 
                // three ways to score -
