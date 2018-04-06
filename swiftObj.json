@@ -1,9 +1,22 @@
 {
+    "modelEndpoint": "http://localhost:8080/v2/yolo",
     "swiftObj": {
-	"container": "ayers-images",
+	"container": "images-aws2",
 	"method": "PUT",
-	"object": "img.jpg",
-	"token": "$S3_AWS_AUTH",
+	"object": "AWS_43eb8354-8d6b-40e4-86a2-cd80925ef0bd_5e88020e-02be-4d70-88a1-b432d0114b3f_1523023356011.jpeg",
+	"token": "BOGUS",
 	"url": "http://$S3_AWS_HOST/v1/AUTH_gv0"
-    }
+    },
+    "AWS_43eb8354-8d6b-40e4-86a2-cd80925ef0bd_5e88020e-02be-4d70-88a1-b432d0114b3f_1523023356011": {
+	"playerId": "43eb8354-8d6b-40e4-86a2-cd80925ef0bd",
+	"taskId": "5e88020e-02be-4d70-88a1-b432d0114b3f",
+	"data-center": "AWS"
+    },
+    "5e88020e-02be-4d70-88a1-b432d0114b3f": {
+	"description": "Find an umbrella",
+	"type": "partyisland",
+	"object": "umbrella",
+	"point": 10
+    },
+    "doNotStore": True
 }
