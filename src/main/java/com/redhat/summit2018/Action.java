@@ -83,14 +83,11 @@ public class Action
          float area = 1;
          float certainty = 0;
          LOGGER.info("looking for: " + targetStr);
-         JsonArray objects = new JsonArray();
-         HashSet<String> set = new HashSet<String>();
+         HashSet<String> objectSet = new HashSet<String>();
          for (Label label : labels) {
             LOGGER.info("model identified: {} - {} - {}", label.getVoc(), label.getScore(), label.getArea());
-            if (!set.contains(label.getVoc())) {
-               set.add(label.getVoc());
-               objects.add(label.getVoc());
-            }
+            objectSet.add(label.getVoc());
+
             if (targetStr.equalsIgnoreCase(label.getVoc())) {
                LOGGER.info("found one; certainty: {}, area: {}", label.getScore(), label.getArea());
                score = task.get("point").getAsInt();
@@ -128,6 +125,8 @@ public class Action
          result.add("data-center", transaction.get("data-center"));
          result.addProperty("taskId", taskId);
          result.addProperty("url", image.getUrl().toString());
+         JsonArray objects = new JsonArray();
+         objectSet.forEach(obj -> objects.add(obj));
          result.add("objects", objects);
          result.add("taskName", task.get("description"));
          result.add("taskObject", target);
