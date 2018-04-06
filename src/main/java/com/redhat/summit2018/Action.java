@@ -147,7 +147,10 @@ public class Action
          result.addProperty("model-exit-time-ms", modelExit);
          result.addProperty("model-duration-time-ms", modelExit - modelEnter);
 
-         store.putResult(transactionId, result);
+         LOGGER.info("store.putResult({}, {})", transactionId, result);
+         if (!args.has("doNotStore")) {
+            store.putResult(transactionId, result);
+         }
       } catch (FileNotFoundException e) {
          e.printStackTrace();
       } catch (IOException e) {
