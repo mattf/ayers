@@ -46,7 +46,10 @@ public class Action
 
          Image image = new Image(args);
          ModelService service = new ModelService(args);
+         long modelEnter, modelExit;
+         modelEnter = System.currentTimeMillis();
          Label[] labels = service.score(image);
+         modelExit = System.currentTimeMillis();
 
          Store store = new Store(args);
          JsonElement object = swiftObj.get("object");
@@ -107,6 +110,10 @@ public class Action
          result.addProperty("function-b-enter-time-ms", enter);
          result.addProperty("function-b-exit-time-ms", exit);
          result.addProperty("function-b-duration-time-ms", exit - enter);
+
+         result.addProperty("model-enter-time-ms", modelEnter);
+         result.addProperty("model-exit-time-ms", modelExit);
+         result.addProperty("model-duration-time-ms", modelExit - modelEnter);
 
          store.putResult(transactionId, result);
       } catch (FileNotFoundException e) {
