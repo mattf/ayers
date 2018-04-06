@@ -58,16 +58,20 @@ public class Action
          }
          String transactionId = object.getAsString().split("\\.", 2)[0];
          LOGGER.info("transaction id: " + transactionId);
-         JsonObject transaction = store.getTransaction(transactionId)
+         JsonObject transaction = args.has(transactionId) ?
+            args.getAsJsonObject(transactionId) :
+            store.getTransaction(transactionId)
             .orElseThrow(() -> new RuntimeException("failed to get transaction: " + transactionId));
          LOGGER.info("transaction: " + transaction);
 
-         JsonElement taskId = transaction.get("taskId");
+         String taskId = transaction.get("taskId").getAsString();
          if (taskId == null) {
             throw new RuntimeException("transaction missing taskId field");
          }
          LOGGER.info("task id: " + taskId);
-         JsonObject task = store.getTask(taskId.getAsString())
+         JsonObject task = args.has(taskId) ?
+            args.getAsJsonObject(taskId) :
+            store.getTask(taskId)
             .orElseThrow(() -> new RuntimeException("failed to get task: " + taskId));
          LOGGER.info("task: " + task);
          JsonElement target = task.get("object");
@@ -76,6 +80,8 @@ public class Action
          }
          String targetStr = target.getAsString();
          int score = 0;
+         float area = 1;
+         float certainty = 0;
          LOGGER.info("looking for: " + targetStr);
          JsonArray objects = new JsonArray();
          HashSet<String> set = new HashSet<String>();
@@ -87,12 +93,35 @@ public class Action
             if (!set.contains(label.getVoc())) {
                set.add(label.getVoc());
                objects.add(label.getVoc());
-               if (targetStr.equalsIgnoreCase(label.getVoc())) {
-                  LOGGER.info("found one");
-                  score = task.get("point").getAsInt();
+            }
+            if (targetStr.equalsIgnoreCase(label.getVoc())) {
+               LOGGER.info("found one; " +
+                           "certainty: " + label.getScore() +
+                           "area: " + label.getArea());
+               score = task.get("point").getAsInt();
+
+               // three ways to score -
+               // 0. area of highest certainty
+               // 1. largest area of any certainty
+               // 2. aggregate area of any certainty
+
+               // 0 -
+               // select correct object with highest certainty
+               if (certainty < label.getScore()) {
+                  certainty = label.getScore();
+                  area = label.getArea();
                }
+
+               // 1 -
+               // select correct object with largest area
+               //area = (area > label.getArea() ? area : label.getArea());
             }
          }
+
+         // TODO: use proportion of area to image as scaling factor
+         // and maybe some additional factor to scale it down
+         score *= area;
+
          LOGGER.info("awarding points: " + score);
 
          JsonObject result = new JsonObject();
@@ -102,7 +131,7 @@ public class Action
          result.add("playerId", transaction.get("playerId"));
          result.addProperty("transactionId", transactionId);
          result.add("data-center", transaction.get("data-center"));
-         result.add("taskId", taskId);
+         result.addProperty("taskId", taskId);
          result.addProperty("url", image.getUrl().toString());
          result.add("objects", objects);
          result.add("taskName", task.get("description"));
