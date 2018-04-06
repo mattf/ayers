@@ -80,7 +80,10 @@ public class Action
          JsonArray objects = new JsonArray();
          HashSet<String> set = new HashSet<String>();
          for (Label label : labels) {
-            LOGGER.info("model identified: " + label.getVoc() + " - " + label.getScore());
+            LOGGER.info("model identified: " +
+                        label.getVoc() + " - " +
+                        label.getScore() + " - " +
+                        label.getArea());
             if (!set.contains(label.getVoc())) {
                set.add(label.getVoc());
                objects.add(label.getVoc());
