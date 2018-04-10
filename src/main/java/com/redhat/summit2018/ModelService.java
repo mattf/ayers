@@ -16,6 +16,8 @@ public class ModelService
 {
    private static final Logger LOGGER = LogManager.getLogger(ModelService.class);
 
+   private static final ResteasyClient client = new ResteasyClientBuilder().build();
+
    private String endpoint;
 
    public ModelService(JsonObject args) {
@@ -27,14 +29,17 @@ public class ModelService
       // Input: { "image": base64(img) } -- Image
       // Output: [ { "score": float, "voc": "[category]" }, ... ] -- Label[]
 
-      ResteasyClient client = new ResteasyClientBuilder().build();
+      // XXX: response isn't Closeable
       Response response = client.target(endpoint)
          .request()
          .accept(MediaType.APPLICATION_JSON_TYPE)
          .post(Entity.entity(image, MediaType.APPLICATION_JSON_TYPE));
       int status = response.getStatus();
       LOGGER.info("model status: " + status);
-      return response.readEntity(Label[].class);
+      Label[] result = response.readEntity(Label[].class);
+      response.close();
+
+      return result;
    }
 
    private String findEndpoint(JsonObject args) {
