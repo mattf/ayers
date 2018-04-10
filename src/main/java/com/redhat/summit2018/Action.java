@@ -110,9 +110,8 @@ public class Action
             }
          }
 
-         // TODO: use proportion of area to image as scaling factor
-         // and maybe some additional factor to scale it down
-         score *= area;
+         if (area > 1)
+            score *= area / 59840;
 
          LOGGER.info("awarding points: " + score);
 
