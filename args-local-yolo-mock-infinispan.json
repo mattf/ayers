@@ -1,0 +1,20 @@
+{
+    "swiftObj": {
+	"container": "",
+	"object": "photo-1431029505519-1fe6fe121714",
+	"token": "BOGUS",
+	"url": "https://images.unsplash.com/"
+    },
+    "photo-1431029505519-1fe6fe121714": {
+	"playerId": "123abc",
+	"taskId": "zyx098",
+	"data-center": "LOCAL"
+    },
+    "zyx098": {
+	"description": "find one",
+	"type": "gametype",
+	"object": "person",
+	"point": 10
+    },
+    "doNotStore": True
+}
